@@ -56,7 +56,7 @@ function App() {
 
       // make detections
       const obj = await net.detect(video);
-      console.log(obj);
+
       // Draw mesh
       const ctx = canvasRef.current.getContext("2d");
 
@@ -66,9 +66,9 @@ function App() {
 
   const getInfo = async () => {
     const query = new AccountInfoQuery()
-    .setAccountId("");
+    .setAccountId(""); //add account id here
     const accountInfo = await query.execute(client);
-    console.log('');
+    console.log(accountInfo);
   }
 
   useEffect(()=>{
