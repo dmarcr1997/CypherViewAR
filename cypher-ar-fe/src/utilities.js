@@ -2,7 +2,12 @@ export const drawRect = (detections, ctx) => {
     detections.forEach(prediction => {
         //get prediction results
         const [x, y, width, height] = prediction['bbox'];
-        const text = prediction['class'];
+        let text;
+        if(prediction['class'] === "cell phone") {
+            text = "0xDEADBEEF\n1.34BTC\n";
+        } else {
+            text = prediction['class'];
+        }
 
         // set styles 
         const color = 'purple';
