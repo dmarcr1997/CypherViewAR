@@ -5,8 +5,21 @@ import * as cocossd from "@tensorflow-models/coco-ssd";
 import Webcam from "react-webcam";
 import "./App.css";
 import { drawRect } from "./utilities";
+import {
+    Client,
+    AccountId,
+    PrivateKey,
+    AccountInfoQuery,
+} from '@hashgraph/sdk';
 
 function App() {
+  if (!process.env.REACT_APP_ACCOUNT_ID ||
+      !process.env.REACT_APP_ACCOUNT_PRIVATE_KEY) {
+      throw new Error('Please set required keys in .env file.');
+  }
+  const accountId = AccountId.fromString(process.env.REACT_APP_ACCOUNT_ID);
+  const accountKey = PrivateKey.fromStringECDSA(process.env.REACT_APP_ACCOUNT_PRIVATE_KEY);
+  const client = Client.forTestnet().setOperator(accountId, accountKey);
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -51,7 +64,17 @@ function App() {
     }
   };
 
-  useEffect(()=>{runCoco()},[]);
+  const getInfo = async () => {
+    const query = new AccountInfoQuery()
+    .setAccountId("");
+    const accountInfo = await query.execute(client);
+    console.log('');
+  }
+
+  useEffect(()=>{
+    runCoco();
+    getInfo();
+  },[]);
 
   return (
     <div className="App">
