@@ -13,6 +13,7 @@ import {
 } from '@hashgraph/sdk';
 
 function App() {
+  const [addr, getAddress] = useState("");
   if (!process.env.REACT_APP_ACCOUNT_ID ||
       !process.env.REACT_APP_ACCOUNT_PRIVATE_KEY) {
       throw new Error('Please set required keys in .env file.');
