@@ -102,7 +102,6 @@ function App() {
     try {
       const response = await axios.get('http://localhost:3000/getHederaAddress'); // Replace with your actual Node.js server URL
       const data = response.data;
-      console.log('Address data:', data.address);
       setAddr(data.address);
     } catch (error) {
       console.error('getAddress error:', error);

@@ -1,7 +1,6 @@
 export const drawRect = (detections, ctx, account) => {
     detections.forEach(prediction => {
         //get prediction results
-        console.log(prediction['class'], account.acct)
         const [x, y, width, height] = prediction['bbox'];
         if((prediction['class'] === "cell phone" 
             || prediction['class'] === "clock"  
