@@ -10,10 +10,12 @@ import {
     AccountId,
     PrivateKey,
     AccountInfoQuery,
+    AccountBalanceQuery
 } from '@hashgraph/sdk';
+import axios from 'axios';
 
 function App() {
-  const [addr, getAddress] = useState("");
+  const [addr, setAddr] = useState("");
   if (!process.env.REACT_APP_ACCOUNT_ID ||
       !process.env.REACT_APP_ACCOUNT_PRIVATE_KEY) {
       throw new Error('Please set required keys in .env file.');
@@ -61,20 +63,43 @@ function App() {
       // Draw mesh
       const ctx = canvasRef.current.getContext("2d");
 
-      drawRect(obj, ctx)  
+      drawRect(obj, ctx, getInfo)  
     }
   };
 
   const getInfo = async () => {
-    const query = new AccountInfoQuery()
-    .setAccountId(""); //add account id here
-    const accountInfo = await query.execute(client);
-    console.log(accountInfo);
+    if(addr !== ''){
+      const queryInfo = new AccountInfoQuery()
+      .setAccountId(addr); //add account id here
+      const accountInfo = await queryInfo.execute(client);
+      const query = new AccountBalanceQuery()
+      .setAccountId(accountId);
+
+      //Submit the query to a Hedera network
+      const accountBalance = await query.execute(client);
+      console.log(`0x${accountInfo.contractAccountId}`, accountBalance.hbars.toString());
+      return { acct: `0x${accountInfo.contractAccountId}`, balance: accountBalance.hbars.toString()}
+    } else {
+      return undefined;
+    }
   }
+
+  const setAddressData = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/getHederaAddress'); // Replace with your actual Node.js server URL
+      const data = response.data;
+      console.log('Address data:', data);
+      setAddr(data.address);
+      console.log(await getInfo());
+    } catch (error) {
+      console.error('getAddress error:', error);
+    }
+  };
+
 
   useEffect(()=>{
     runCoco();
-    getInfo();
+    setAddressData();
   },[]);
 
   return (

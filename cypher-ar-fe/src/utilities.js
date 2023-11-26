@@ -1,12 +1,15 @@
-export const drawRect = (detections, ctx) => {
+export const drawRect = (detections, ctx, account) => {
     detections.forEach(prediction => {
         //get prediction results
         const [x, y, width, height] = prediction['bbox'];
         let text;
-        if(prediction['class'] === "cell phone") {
-            text = "0xDEADBEEF\n1.34BTC\n";
+        let text2;
+        if(prediction['class'] === "cell phone" && account !== undefined) {
+            text = account.acct;
+            text2 = account.balance;
         } else {
             text = prediction['class'];
+            text2 = `${account.balance}`;
         }
 
         // set styles 
@@ -18,6 +21,7 @@ export const drawRect = (detections, ctx) => {
         //draw rect
         ctx.beginPath();
         ctx.fillText(text, x, y);
+        ctx.fillText(text2, x + 10, y + 10);
         ctx.rect(x, y, width, height);
         ctx.stroke();
     });

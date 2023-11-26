@@ -1,8 +1,12 @@
 const express = require('express');
+const cors = require('cors');
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 
 const app = express();
+app.use(cors({
+  origin: 'http://localhost:3001' // Replace with your React app's origin
+}));
 const port = process.env.PORT || 3000; // Use port 3000 by default
 const serialPort = new SerialPort({
     path: 'COM12', 
@@ -36,6 +40,7 @@ function sendToSerial(data) {
 
 app.get('/getHederaAddress', async (req, res) => {
     const data = await getAddressData();
+    dataBuffer = '';
     res.send({address: data});
 });
 
