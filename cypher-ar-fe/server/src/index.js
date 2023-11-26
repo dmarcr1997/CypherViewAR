@@ -1,26 +1,44 @@
 const express = require('express');
-const SerialPort = require('serialport');
+const { SerialPort } = require('serialport');
+const { ReadlineParser } = require('@serialport/parser-readline');
 
 const app = express();
 const port = process.env.PORT || 3000; // Use port 3000 by default
-const serialPort = new SerialPort('COM8', { baudRate: 9600 });
+const serialPort = new SerialPort({
+    path: 'COM12', 
+    baudRate: 9600,
+    dataBits: 8,
+    parity: 'none',
+    stopBits: 1,
+    flowControl: false });
+const parser = serialPort.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+let dataBuffer = '';
 
-let address = '';
+const getAddressData = () => {
+    return new Promise((resolve, reject) => {
+        sendToSerial('getHederaAddress'); // Send 'getAddress' to the serial port
 
-serialPort.on('data', (data) => {
-  address = data.toString().trim(); // Extract the address value from the received data
-});
+        parser.once('data', (data) => {
+            dataBuffer += data;
+            resolve(dataBuffer); // Resolve the promise with the received data
+        });
 
-app.post('/getHederaAddress', (req, res) => {
-    serialPort.write('getHederaAddress'); // Send 'getHederaAddress' to the serial port
-
-    serialPort.on('data', (data) => {
-        // Handle the response from the Arduino
-        const address = data.toString().trim();
-        res.send({ address });
+        parser.once('error', (error) => {
+            reject(error); // Reject the promise with the error
+        });
     });
+};
+
+function sendToSerial(data) {
+    console.log("sending to serial: " + data);
+    serialPort.write(data);
+}
+
+app.get('/getHederaAddress', async (req, res) => {
+    const data = await getAddressData();
+    res.send({address: data});
 });
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+    console.log(`Server running on port ${port}`);
 });

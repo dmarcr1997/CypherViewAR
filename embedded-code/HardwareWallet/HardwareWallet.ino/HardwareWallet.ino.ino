@@ -1,22 +1,20 @@
-#include <SoftwareSerial.h>
-
-
-
 void setup() {
   Serial.begin(9600);
 }
 
 void loop() {
-    // Read data from the serial port
-    String data = Serial.readStringUntil('\n');
+  if (Serial.available() > 0) {
+      // Read data from the serial port
+      String data = Serial.readStringUntil('\n');
 
-    // Check if the data is a request for the Hedera address
-    if (data == "getHederaAddress") {
-      // Get the Hedera address from the Arduino
-      String hederaAddress = getHederaAddress();
+      // Check if the data is a request for the Hedera address
+      if (data == "getHederaAddress") {
+        // Get the Hedera address from the Arduino
+        String hederaAddress = getHederaAddress();
 
-      // Send the Hedera address to the React webapp
-      Serial.println(hederaAddress);
+        // Send the Hedera address to the React webapp
+        Serial.println(hederaAddress);
+    }
   }
 }
 
