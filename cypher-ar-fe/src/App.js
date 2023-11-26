@@ -16,6 +16,9 @@ import axios from 'axios';
 
 function App() {
   const [addr, setAddr] = useState("");
+  const [cachedAcct, setCachedAcct] = useState("");
+  const [cachedBalance, setCachedBalance] = useState("");
+  
   if (!process.env.REACT_APP_ACCOUNT_ID ||
       !process.env.REACT_APP_ACCOUNT_PRIVATE_KEY) {
       throw new Error('Please set required keys in .env file.');
@@ -62,35 +65,45 @@ function App() {
 
       // Draw mesh
       const ctx = canvasRef.current.getContext("2d");
-
-      drawRect(obj, ctx, getInfo)  
+      const info = await getInfo();
+      drawRect(obj, ctx, info)  
     }
   };
 
   const getInfo = async () => {
-    if(addr !== ''){
-      const queryInfo = new AccountInfoQuery()
-      .setAccountId(addr); //add account id here
-      const accountInfo = await queryInfo.execute(client);
-      const query = new AccountBalanceQuery()
-      .setAccountId(accountId);
-
-      //Submit the query to a Hedera network
-      const accountBalance = await query.execute(client);
-      console.log(`0x${accountInfo.contractAccountId}`, accountBalance.hbars.toString());
-      return { acct: `0x${accountInfo.contractAccountId}`, balance: accountBalance.hbars.toString()}
-    } else {
-      return undefined;
+    let acct;
+    let balance;
+    if(addr !== ""){
+      if(cachedAcct !== ""){
+        acct = cachedAcct;
+      } else {
+        const queryInfo = new AccountInfoQuery()
+        .setAccountId(addr); //add account id here
+        const accountInfo = await queryInfo.execute(client);
+        acct = `0x${accountInfo.contractAccountId}`;
+        setCachedAcct(acct);
+      }
+      if(cachedBalance !== ""){
+        balance = cachedBalance;
+      } else {
+        const query = new AccountBalanceQuery()
+        .setAccountId(addr);
+        //Submit the query to a Hedera network
+        const accountBalance = await query.execute(client);
+        balance = accountBalance.hbars.toString();
+        setCachedBalance(balance);
+      }
     }
+
+    return { acct, balance }
   }
 
   const setAddressData = async () => {
     try {
       const response = await axios.get('http://localhost:3000/getHederaAddress'); // Replace with your actual Node.js server URL
       const data = response.data;
-      console.log('Address data:', data);
+      console.log('Address data:', data.address);
       setAddr(data.address);
-      console.log(await getInfo());
     } catch (error) {
       console.error('getAddress error:', error);
     }
